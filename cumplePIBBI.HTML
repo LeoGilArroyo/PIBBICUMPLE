@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestor de Cumpleaños - Congregación PIBBI</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/playfair-display@5.0.0/index.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --secondary: #ec4899;
+  --gold: #f59e0b;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #1e293b;
+  --text-light: #64748b;
+  --border: #e2e8f0;
+  --success: #10b981;
+  --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-warm: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-gold: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  --shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.05);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(102, 126, 234, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.08) 0px, transparent 50%);
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Header */
+.header {
+  background: var(--gradient);
+  border-radius: 24px;
+  padding: 40px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-bottom: 30px;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.header-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icon {
+  font-size: 48px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+}
+
+.header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.header p {
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
+
+.header-date {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  padding: 12px 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.2);
+  text-align: center;
+}
+
+.header-date .day {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.header-date .month {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: var(--card);
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.3s ease;
+  border: 1px solid var(--border);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.stat-icon.today { background: linear-gradient(135deg, #f093fb, #f5576c); }
+.stat-icon.upcoming { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.stat-icon.total { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+.stat-icon.month { background: linear-gradient(135deg, #fa709a, #fee140); }
+
+.stat-info h3 {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.stat-info .number {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+/* Navigation */
+.nav-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  background: var(--card);
+  padding: 8px;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  overflow-x: auto;
+  border: 1px solid var(--border);
+}
+
+.nav-tab {
+  flex: 1;
+  min-width: 140px;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.nav-tab:hover {
+  background: #f1f5f9;
+  color: var(--text);
+}
+
+.nav-tab.active {
+  background: var(--gradient);
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* Sections */
+.section {
+  display: none;
+  animation: fadeIn 0.4s ease;
+}
+
+.section.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Cards */
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Birthday cards */
+.birthday-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.birthday-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.birthday-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--gradient);
+}
+
+.birthday-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.2);
+}
+
+.birthday-card.today {
+  background: linear-gradient(135deg, #fff5f7 0%, #fff 100%);
+  border: 2px solid #f093fb;
+}
+
+.birthday-card.today::before {
+  background: var(--gradient-warm);
+  width: 6px;
+}
+
+.birthday-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.birthday-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.birthday-card.today .birthday-avatar {
+  background: var(--gradient-warm);
+  font-size: 1.5rem;
+}
+
+.birthday-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.birthday-date {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+.birthday-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.88rem;
+  color: var(--text-light);
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+}
+
+.birthday-info div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.birthday-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--gradient-warm);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Search */
+.search-box {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.search-box::before {
+  content: '🔍';
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+}
+
+/* Month selector */
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.month-btn {
+  padding: 14px;
+  border: 2px solid var(--border);
+  background: white;
+  border-radius: 12px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.month-btn:hover {
+  border-color: var(--primary);
+  background: #f5f7ff;
+}
+
+.month-btn.active {
+  background: var(--gradient);
+  color: white;
+  border-color: var(--primary);
+}
+
+.month-btn .count {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-top: 2px;
+}
+
+/* Form */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group.full {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.form-group input, .form-group select {
+  padding: 12px 14px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.form-group input:focus, .form-group select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: var(--gradient);
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+}
+
+.btn-secondary {
+  background: #f1f5f9;
+  color: var(--text);
+}
+
+.btn-secondary:hover {
+  background: #e2e8f0;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.btn-danger {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+
+.btn-danger:hover {
+  background: #fecaca;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-light);
+}
+
+.empty-state .emoji {
+  font-size: 4rem;
+  margin-bottom: 16px;
+}
+
+.empty-state h3 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transform: translateX(400px);
+  transition: transform 0.3s ease;
+  z-index: 1000;
+  border-left: 4px solid var(--success);
+}
+
+.toast.show {
+  transform: translateX(0);
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 20px;
+}
+
+.modal-overlay.show {
+  display: flex;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal h2 {
+  font-family: 'Playfair Display', serif;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .header { padding: 24px; }
+  .header h1 { font-size: 1.5rem; }
+  .header-icon { font-size: 36px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .nav-tab { font-size: 0.8rem; padding: 10px 12px; }
+  .container { padding: 12px; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <div class="header-title">
+        <div class="header-icon">⛪</div>
+        <div>
+          <h1>Gestor de Cumpleaños</h1>
+          <p>Congregación PIBBI - Directorio de Hermanos</p>
+        </div>
+      </div>
+      <div class="header-date">
+        <div class="day" id="todayDay">--</div>
+        <div class="month" id="todayMonth">---</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon today">🎂</div>
+      <div class="stat-info">
+        <h3>Cumpleaños Hoy</h3>
+        <div class="number" id="statToday">0</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon upcoming">📅</div>
+      <div class="stat-info">
+        <h3>Próximos 30 días</h3>
+        <div class="number" id="statUpcoming">0</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon total">👥</div>
+      <div class="stat-info">
+        <h3>Total Hermanos</h3>
+        <div class="number" id="statTotal">0</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon month">📊</div>
+      <div class="stat-info">
+        <h3>Este Mes</h3>
+        <div class="number" id="statMonth">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-tab="today">🎂 Hoy</button>
+    <button class="nav-tab" data-tab="upcoming">📅 Próximos</button>
+    <button class="nav-tab" data-tab="month">📆 Por Mes</button>
+    <button class="nav-tab" data-tab="search">🔍 Buscar</button>
+    <button class="nav-tab" data-tab="add">➕ Agregar</button>
+    <button class="nav-tab" data-tab="all">📋 Todos</button>
+  </div>
+
+  <!-- Section: Today -->
+  <div class="section active" id="section-today">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🎉 Cumpleaños de Hoy</div>
+      </div>
+      <div id="todayList"></div>
+    </div>
+  </div>
+
+  <!-- Section: Upcoming -->
+  <div class="section" id="section-upcoming">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🗓️ Próximos 30 Días</div>
+      </div>
+      <div id="upcomingList"></div>
+    </div>
+  </div>
+
+  <!-- Section: By Month -->
+  <div class="section" id="section-month">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📅 Cumpleaños por Mes</div>
+      </div>
+      <div class="month-grid" id="monthGrid"></div>
+      <div id="monthList"></div>
+    </div>
+  </div>
+
+  <!-- Section: Search -->
+  <div class="section" id="section-search">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🔍 Buscar Hermano</div>
+      </div>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Escribe el nombre o apellido...">
+      </div>
+      <div id="searchResults"></div>
+    </div>
+  </div>
+
+  <!-- Section: Add -->
+  <div class="section" id="section-add">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">➕ Agregar Nuevo Hermano</div>
+      </div>
+      <form id="addForm">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Nombre completo *</label>
+            <input type="text" id="fNombre" required placeholder="Ej: Juan Pérez López">
+          </div>
+          <div class="form-group">
+            <label>Día (1-31) *</label>
+            <input type="number" id="fDia" min="1" max="31" required>
+          </div>
+          <div class="form-group">
+            <label>Mes (1-12) *</label>
+            <select id="fMes" required>
+              <option value="">Seleccionar...</option>
+              <option value="1">Enero</option>
+              <option value="2">Febrero</option>
+              <option value="3">Marzo</option>
+              <option value="4">Abril</option>
+              <option value="5">Mayo</option>
+              <option value="6">Junio</option>
+              <option value="7">Julio</option>
+              <option value="8">Agosto</option>
+              <option value="9">Septiembre</option>
+              <option value="10">Octubre</option>
+              <option value="11">Noviembre</option>
+              <option value="12">Diciembre</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Teléfono / Celular</label>
+            <input type="tel" id="fCelular" placeholder="987654321">
+          </div>
+          <div class="form-group">
+            <label>Dirección</label>
+            <input type="text" id="fDireccion" placeholder="Calle, número, distrito">
+          </div>
+          <div class="form-group full" style="flex-direction: row; gap: 10px; margin-top: 10px;">
+            <button type="submit" class="btn btn-primary">💾 Guardar Hermano</button>
+            <button type="reset" class="btn btn-secondary">Limpiar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Section: All -->
+  <div class="section" id="section-all">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📋 Directorio Completo</div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn btn-success" onclick="exportCSV()">📥 Exportar CSV</button>
+          <button class="btn btn-secondary" onclick="exportJSON()">📦 Exportar JSON</button>
+        </div>
+      </div>
+      <div class="search-box">
+        <input type="text" id="filterAll" placeholder="Filtrar en el directorio...">
+      </div>
+      <div id="allList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span id="toastIcon">✅</span>
+  <span id="toastMsg">Operación exitosa</span>
+</div>
+
+<script>
+// ============ DATOS ============
+const NOMBRES_MESES = [
+  "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+];
+
+const DATOS_INICIALES = [
+  { nombre: "Giovana Ruth Valenzuela Guerra", dia: 11, mes: 1, celular: "939230606", direccion: "Pasaje los Ángeles Mz 1 - Lt 3 (Azapampa)" },
+  { nombre: "Estrella Gloria Cerrón Quispe", dia: 11, mes: 1, celular: "989265939", direccion: "Pje. Lucernas S/N - El Tambo" },
+  { nombre: "Leonidas Gil Arroyo Lozano", dia: 19, mes: 1, celular: "989444033", direccion: "Prol. Hilarión N° 175 - Incho - El Tambo" },
+  { nombre: "Ruth Hidalgo Arias", dia: 29, mes: 1, celular: "955079145", direccion: "Jr. Gamarra N° 319 - Chilca" },
+  { nombre: "Juana Gamero Ochoa", dia: 8, mes: 2, celular: "", direccion: "" },
+  { nombre: "Ariel Romero Belledonne", dia: 16, mes: 2, celular: "", direccion: "" },
+  { nombre: "Débora Negri Retamozo", dia: 23, mes: 2, celular: "988006927", direccion: "Psje. Borges N° 105 - El Tambo" },
+  { nombre: "Fiorella Retamozo Lezama", dia: 27, mes: 3, celular: "954407885", direccion: "Psje. Borges N° 105 - El Tambo" },
+  { nombre: "Meiling Macuri", dia: 27, mes: 3, celular: "", direccion: "" },
+  { nombre: "Marcelina Nélida Gamero Ochoa", dia: 27, mes: 3, celular: "", direccion: "" },
+  { nombre: "Josué Alejandro Gil Arroyo Riveros", dia: 6, mes: 4, celular: "959163164", direccion: "Prol. Hilarión N° 175 - Incho - El Tambo" },
+  { nombre: "Julio Negri Gutiérrez (Pastor)", dia: 6, mes: 4, celular: "956046608", direccion: "Pje. Salazar Bondy N° 116" },
+  { nombre: "Cleofe Carrasco", dia: 12, mes: 4, celular: "", direccion: "" },
+  { nombre: "Gabriel Eliezer Gago Hidalgo", dia: 13, mes: 4, celular: "", direccion: "Jr. Gamarra N° 319 - Chilca" },
+  { nombre: "Sonia Mery Riveros Cerrón", dia: 15, mes: 4, celular: "959163164", direccion: "Prol. Hilarión N° 175 - Incho - El Tambo" },
+  { nombre: "Maximiliano Huamán Bendezú", dia: 15, mes: 4, celular: "", direccion: "" },
+  { nombre: "Talia Gil Arroyo Lozano", dia: 17, mes: 4, celular: "939990329", direccion: "Pasaje las S/N Pío Pata" },
+  { nombre: "Nicol Samaniego Valenzuela", dia: 20, mes: 4, celular: "", direccion: "Pasaje los Ángeles Mz 1 - Lt 3 (Azapampa)" },
+  { nombre: "Antonella", dia: 23, mes: 4, celular: "", direccion: "" },
+  { nombre: "Saraí Palomino Roca", dia: 24, mes: 4, celular: "966591675", direccion: "Pje. La Merced N° 147 - Palián" },
+  { nombre: "Yonaiker Aníbal Velásquez García", dia: 27, mes: 4, celular: "", direccion: "" },
+  { nombre: "Susana Gil Arroyo Lozano", dia: 15, mes: 5, celular: "", direccion: "" },
+  { nombre: "Gustavo Aguirre", dia: 20, mes: 5, celular: "", direccion: "" },
+  { nombre: "Rosmery Palomino Roca", dia: 30, mes: 5, celular: "945435609", direccion: "Calle Begonias N° 496 - El Tambo" },
+  { nombre: "Milka Meza Palomino", dia: 8, mes: 6, celular: "990624424", direccion: "Psje. La Merced N° 147 - Palián" },
+  { nombre: "Saulo Montes Reyes", dia: 27, mes: 6, celular: "931927062", direccion: "Jr. Libertad N° 585 Vilcacoto N° 16" },
+  { nombre: "Miguel Medina Hinostroza", dia: 29, mes: 6, celular: "964203470", direccion: "Av. José Olaya N° 652 - Huancayo" },
+  { nombre: "Esthefany Gamero C.", dia: 1, mes: 7, celular: "", direccion: "" },
+  { nombre: "Clara Lozano Palacios", dia: 6, mes: 7, celular: "", direccion: "" },
+  { nombre: "Santiago", dia: 25, mes: 7, celular: "", direccion: "No precisó" },
+  { nombre: "Anderson", dia: 3, mes: 8, celular: "", direccion: "" },
+  { nombre: "Roycer Ricardo Macuri Suárez", dia: 12, mes: 8, celular: "963944471", direccion: "Urb. Corona del Fraile c/. Las Garzas Sur N° 143" },
+  { nombre: "Paolo Francisco Pautrat Cañete", dia: 21, mes: 8, celular: "", direccion: "" },
+  { nombre: "José Luis Gil Arroyo Aguilar", dia: 27, mes: 8, celular: "953620403", direccion: "Jr. Mantaro 798 - Huancayo" },
+  { nombre: "Miqueas Huaynate Valerio", dia: 27, mes: 8, celular: "939230606", direccion: "Pasaje los Ángeles Mz 1 - Lt 3 (Azapampa)" },
+  { nombre: "Daniela Rojas Palomino", dia: 29, mes: 8, celular: "942943331", direccion: "Begonias N° 496" },
+  { nombre: "Rosario Vera Coca", dia: 4, mes: 9, celular: "", direccion: "" },
+  { nombre: "Ana C. Matías Aliaga", dia: 11, mes: 9, celular: "990013911", direccion: "C.H. Ramiro Prialé, Psje. Los Cipreces MZ-I, LT-7" },
+  { nombre: "Violeta Seguil López", dia: 13, mes: 9, celular: "965772968", direccion: "Jr. Libertad N° 585 Vilcacoto N° 16" },
+  { nombre: "Videla Seguil López", dia: 13, mes: 9, celular: "", direccion: "" },
+  { nombre: "Ginny Gil Arroyo Lozano", dia: 16, mes: 9, celular: "902840370", direccion: "Prol. Hilarión N° 175 - Incho - El Tambo" },
+  { nombre: "Gio Mendoza", dia: 21, mes: 9, celular: "", direccion: "" },
+  { nombre: "Alexander Retamozo Negri", dia: 22, mes: 9, celular: "", direccion: "" },
+  { nombre: "Jorge Bryan Yap Cabanillas", dia: 24, mes: 9, celular: "900270156", direccion: "" },
+  { nombre: "Rosario Carrión Atencio", dia: 27, mes: 9, celular: "", direccion: "" },
+  { nombre: "Richard Rojas Guerra", dia: 28, mes: 9, celular: "998569348", direccion: "Calle Begonias N° 496 - El Tambo" },
+  { nombre: "Francisco Pariona Cangalaya", dia: 28, mes: 9, celular: "", direccion: "" },
+  { nombre: "Jefe Macuri", dia: 2, mes: 10, celular: "", direccion: "" },
+  { nombre: "Yannet López Ayala", dia: 4, mes: 10, celular: "938448572", direccion: "URB. Planicie del Fraile c/ Las Garzas Sur N° 143" },
+  { nombre: "Jemima Ruth Gago Hidalgo", dia: 5, mes: 10, celular: "", direccion: "" },
+  { nombre: "Melinda Huaynate Valenzuela", dia: 6, mes: 10, celular: "", direccion: "Pasaje los Ángeles Mz 1 - Lt 3 (Azapampa)" },
+  { nombre: "José", dia: 7, mes: 10, celular: "", direccion: "" },
+  { nombre: "Rubén Negri Marticorena (Pastor)", dia: 7, mes: 10, celular: "988006927", direccion: "Psje. Borges N° 105 - El Tambo" },
+  { nombre: "Aaron Meza Palomino", dia: 8, mes: 10, celular: "966591675", direccion: "Psje. La Merced N° 147 - Palián" },
+  { nombre: "Manuel Jesús Arana Sánchez", dia: 16, mes: 10, celular: "939950336", direccion: "Calle las Magnolias N° 563 Incho - El Tambo" },
+  { nombre: "Priscila Negri Marticorena", dia: 20, mes: 10, celular: "942156581", direccion: "Pje. Salazar Bondy N° 116" },
+  { nombre: "Ana Margarita Negri Martínez", dia: 24, mes: 10, celular: "", direccion: "" },
+  { nombre: "Wilfredo Heliades Gago Catacora", dia: 10, mes: 11, celular: "", direccion: "Jr. Gamarra N° 319 - Chilca" },
+  { nombre: "Daniel Negri Retamozo", dia: 12, mes: 11, celular: "913859988", direccion: "Psje. Borges N° 105 - El Tambo" },
+  { nombre: "Danae Negri Retamozo", dia: 13, mes: 11, celular: "", direccion: "" },
+  { nombre: "Gladys Cecilia Aliaga Amaro", dia: 22, mes: 11, celular: "922460893", direccion: "Psje. Los Cipreces Mz. I, Lt. 7 (Ramiro Prialé)" },
+  { nombre: "Teresa Lezama Tovar", dia: 24, mes: 11, celular: "972607811", direccion: "Jr. Libertad N° 1229 - Huancayo" },
+  { nombre: "Lysbeth Riveros Cerrón", dia: 30, mes: 11, celular: "957363884", direccion: "Pje. Lucernas S/N Tambo" },
+  { nombre: "Nathali Matías Aliaga", dia: 21, mes: 12, celular: "995934582", direccion: "Psje. Los Cipreces MZ-I, LT-7" },
+  { nombre: "Celeste", dia: 22, mes: 12, celular: "", direccion: "" },
+  { nombre: "Benicia Pastora Roca Chávez", dia: 28, mes: 12, celular: "954937786", direccion: "Psje. La Merced N° 147 - Palián" }
+];
+
+// ============ ESTADO ============
+let datos = [];
+let selectedMonth = new Date().getMonth() + 1;
+
+// ============ UTILS ============
+function cargarDatos() {
+  const saved = localStorage.getItem('cumpleanos_pibbi');
+  if (saved) {
+    try {
+      datos = JSON.parse(saved);
+    } catch(e) {
+      datos = [...DATOS_INICIALES];
+    }
+  } else {
+    datos = [...DATOS_INICIALES];
+    guardarDatos();
+  }
+}
+
+function guardarDatos() {
+  localStorage.setItem('cumpleanos_pibbi', JSON.stringify(datos));
+}
+
+function getInitials(name) {
+  return name.split(' ').filter(w => w.length > 2).slice(0, 2).map(w => w[0]).join('').toUpperCase() || name[0].toUpperCase();
+}
+
+function showToast(msg, icon = '✅') {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  document.getElementById('toastIcon').textContent = icon;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function getCumpleanosHoy() {
+  const hoy = new Date();
+  return datos.filter(h => h.dia === hoy.getDate() && h.mes === hoy.getMonth() + 1);
+}
+
+function getProximosCumpleanos(diasAdelante = 30) {
+  const hoy = new Date();
+  hoy.setHours(0,0,0,0);
+  const proximos = [];
+  
+  datos.forEach(h => {
+    let year = hoy.getFullYear();
+    let maxDia = new Date(year, h.mes, 0).getDate();
+    let dia = Math.min(h.dia, maxDia);
+    let fecha = new Date(year, h.mes - 1, dia);
+    
+    if (fecha < hoy) {
+      fecha = new Date(year + 1, h.mes - 1, dia);
+    }
+    
+    const diasFaltantes = Math.round((fecha - hoy) / (1000 * 60 * 60 * 24));
+    
+    if (diasFaltantes >= 0 && diasFaltantes <= diasAdelante) {
+      proximos.push({ ...h, diasFaltantes, fechaProxima: fecha });
+    }
+  });
+  
+  proximos.sort((a, b) => a.diasFaltantes - b.diasFaltantes);
+  return proximos;
+}
+
+function formatTiempo(dias) {
+  if (dias === 0) return '¡HOY!';
+  if (dias === 1) return 'Mañana';
+  return `En ${dias} días`;
+}
+
+// ============ RENDER ============
+function renderBirthdayCard(h, options = {}) {
+  const isToday = options.today || false;
+  const badge = options.badge || '';
+  const showDelete = options.showDelete || false;
+  
+  return `
+    <div class="birthday-card ${isToday ? 'today' : ''}">
+      ${badge ? `<div class="birthday-badge">${badge}</div>` : ''}
+      <div class="birthday-top">
+        <div class="birthday-avatar">${isToday ? '🎂' : getInitials(h.nombre)}</div>
+        <div>
+          <div class="birthday-name">${h.nombre}</div>
+          <div class="birthday-date">${h.dia} de ${NOMBRES_MESES[h.mes]}</div>
+        </div>
+      </div>
+      <div class="birthday-info">
+        ${h.celular ? `<div>📱 ${h.celular}</div>` : ''}
+        ${h.direccion ? `<div>🏠 ${h.direccion}</div>` : ''}
+        ${h.diasFaltantes !== undefined ? `<div>⏳ ${formatTiempo(h.diasFaltantes)}</div>` : ''}
+      </div>
+      ${showDelete ? `<div style="margin-top: 12px; text-align: right;"><button class="btn btn-danger" onclick="eliminarHermano('${h.nombre.replace(/'/g, "\\'")}')">🗑️ Eliminar</button></div>` : ''}
+    </div>
+  `;
+}
+
+function renderHoy() {
+  const cumpleaneros = getCumpleanosHoy();
+  const container = document.getElementById('todayList');
+  
+  if (cumpleaneros.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">🎈</div>
+        <h3>Hoy no hay cumpleaños</h3>
+        <p>No hay hermanos que celebren su cumpleaños en esta fecha.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = `
+    <div class="birthday-list">
+      ${cumpleaneros.map(h => renderBirthdayCard(h, { today: true, badge: '¡Felicidades!' })).join('')}
+    </div>
+  `;
+}
+
+function renderProximos() {
+  const proximos = getProximosCumpleanos(30);
+  const container = document.getElementById('upcomingList');
+  
+  if (proximos.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">📅</div>
+        <h3>Sin próximos cumpleaños</h3>
+        <p>No hay cumpleaños registrados en los próximos 30 días.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = `
+    <div class="birthday-list">
+      ${proximos.map(h => {
+        const badge = h.diasFaltantes === 0 ? '¡HOY!' : h.diasFaltantes <= 7 ? `En ${h.diasFaltantes} días` : '';
+        return renderBirthdayCard(h, { badge, today: h.diasFaltantes === 0 });
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderMes() {
+  const grid = document.getElementById('monthGrid');
+  const counts = {};
+  for (let i = 1; i <= 12; i++) counts[i] = 0;
+  datos.forEach(h => counts[h.mes]++);
+  
+  grid.innerHTML = `
+    <button class="month-btn ${selectedMonth === 0 ? 'active' : ''}" onclick="selectMonth(0)">
+      Todos <span class="count">${datos.length}</span>
+    </button>
+    ${NOMBRES_MESES.slice(1).map((m, i) => `
+      <button class="month-btn ${selectedMonth === i+1 ? 'active' : ''}" onclick="selectMonth(${i+1})">
+        ${m} <span class="count">${counts[i+1]}</span>
+      </button>
+    `).join('')}
+  `;
+  
+  renderMonthList();
+}
+
+function renderMonthList() {
+  const container = document.getElementById('monthList');
+  let hermanos = datos;
+  
+  if (selectedMonth > 0) {
+    hermanos = datos.filter(h => h.mes === selectedMonth);
+  }
+  
+  hermanos = [...hermanos].sort((a, b) => {
+    if (a.mes !== b.mes) return a.mes - b.mes;
+    return a.dia - b.dia;
+  });
+  
+  if (hermanos.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">📭</div>
+        <h3>Sin registros</h3>
+        <p>No hay hermanos registrados en este mes.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = `
+    <div class="birthday-list">
+      ${hermanos.map(h => renderBirthdayCard(h)).join('')}
+    </div>
+  `;
+}
+
+function selectMonth(m) {
+  selectedMonth = m;
+  renderMes();
+}
+
+function renderSearch(query = '') {
+  const container = document.getElementById('searchResults');
+  
+  if (!query.trim()) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">🔍</div>
+        <h3>Busca a un hermano</h3>
+        <p>Escribe el nombre o apellido para encontrar su información.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  const q = query.toLowerCase();
+  const resultados = datos.filter(h => h.nombre.toLowerCase().includes(q));
+  
+  if (resultados.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">😕</div>
+        <h3>Sin resultados</h3>
+        <p>No se encontraron hermanos con "${query}"</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = `
+    <p style="color: var(--text-light); margin-bottom: 16px;">Se encontraron <strong>${resultados.length}</strong> resultado(s)</p>
+    <div class="birthday-list">
+      ${resultados.map(h => renderBirthdayCard(h)).join('')}
+    </div>
+  `;
+}
+
+function renderAll(filter = '') {
+  const container = document.getElementById('allList');
+  let list = [...datos].sort((a, b) => {
+    if (a.mes !== b.mes) return a.mes - b.mes;
+    if (a.dia !== b.dia) return a.dia - b.dia;
+    return a.nombre.localeCompare(b.nombre);
+  });
+  
+  if (filter.trim()) {
+    const q = filter.toLowerCase();
+    list = list.filter(h => h.nombre.toLowerCase().includes(q) || 
+                            (h.celular && h.celular.includes(q)) ||
+                            (h.direccion && h.direccion.toLowerCase().includes(q)));
+  }
+  
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">📋</div>
+        <h3>Sin resultados</h3>
+        <p>No hay hermanos que coincidan con el filtro.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = `
+    <p style="color: var(--text-light); margin-bottom: 16px;">Mostrando <strong>${list.length}</strong> de ${datos.length} hermanos</p>
+    <div class="birthday-list">
+      ${list.map(h => renderBirthdayCard(h, { showDelete: true })).join('')}
+    </div>
+  `;
+}
+
+function updateStats() {
+  const hoy = getCumpleanosHoy();
+  const proximos = getProximosCumpleanos(30);
+  const currentMonth = new Date().getMonth() + 1;
+  const esteMes = datos.filter(h => h.mes === currentMonth);
+  
+  document.getElementById('statToday').textContent = hoy.length;
+  document.getElementById('statUpcoming').textContent = proximos.length;
+  document.getElementById('statTotal').textContent = datos.length;
+  document.getElementById('statMonth').textContent = esteMes.length;
+}
+
+function updateHeaderDate() {
+  const hoy = new Date();
+  document.getElementById('todayDay').textContent = hoy.getDate();
+  document.getElementById('todayMonth').textContent = NOMBRES_MESES[hoy.getMonth() + 1];
+}
+
+// ============ ACCIONES ============
+function eliminarHermano(nombre) {
+  if (!confirm(`¿Seguro que deseas eliminar a "${nombre}"?`)) return;
+  datos = datos.filter(h => h.nombre !== nombre);
+  guardarDatos();
+  renderAll();
+  updateStats();
+  showToast('Hermano eliminado', '🗑️');
+}
+
+function exportCSV() {
+  let csv = 'Nombre,Día,Mes,Mes Nombre,Teléfono,Dirección\n';
+  datos.forEach(h => {
+    csv += `"${h.nombre}",${h.dia},${h.mes},"${NOMBRES_MESES[h.mes]}","${h.celular || ''}","${h.direccion || ''}"\n`;
+  });
+  
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'cumpleanos_pibbi.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV exportado', '📥');
+}
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'cumpleanos_pibbi.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('JSON exportado', '📦');
+}
+
+// ============ EVENTOS ============
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('section-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  renderSearch(e.target.value);
+});
+
+document.getElementById('filterAll').addEventListener('input', (e) => {
+  renderAll(e.target.value);
+});
+
+document.getElementById('addForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const nombre = document.getElementById('fNombre').value.trim();
+  const dia = parseInt(document.getElementById('fDia').value);
+  const mes = parseInt(document.getElementById('fMes').value);
+  const celular = document.getElementById('fCelular').value.trim();
+  const direccion = document.getElementById('fDireccion').value.trim();
+  
+  if (!nombre || !dia || !mes) {
+    showToast('Completa los campos obligatorios', '⚠️');
+    return;
+  }
+  
+  if (dia < 1 || dia > 31 || mes < 1 || mes > 12) {
+    showToast('Fecha inválida', '⚠️');
+    return;
+  }
+  
+  datos.push({ nombre, dia, mes, celular, direccion });
+  guardarDatos();
+  e.target.reset();
+  updateStats();
+  renderMes();
+  renderAll();
+  showToast(`${nombre} agregado exitosamente`, '✅');
+});
+
+// ============ INIT ============
+cargarDatos();
+updateHeaderDate();
+updateStats();
+renderHoy();
+renderProximos();
+renderMes();
+renderAll();
+</script>
+
+</body>
+</html>
